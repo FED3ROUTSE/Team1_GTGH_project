@@ -32,16 +32,18 @@ class EurLexDownloader:
     def _save_file(self, content: bytes, celex: str) -> Path:
         file_path = self.get_file_path(celex)
         file_path.write_bytes(content)
-        return file_path
 
     def get_file_path(self, celex: str) -> Path:
         file_type_end = self.file_type.lower()
         return self.out_dir / f"{celex}_{self.language}.{file_type_end}"
 
-    def exists(self) -> bool:
-        return self.get_file_path().exists()
+    def exists(self, celex) -> bool:
+        return self.get_file_path(celex).exists()
 
     def download(self, celex) -> Path:
+        if self.exists(celex):
+            print("File already exists. It will not be downloaded again.")
+            return
         url = self._build_url(celex)
         file_type_end = self.file_type.lower()
 
@@ -64,8 +66,9 @@ class EurLexDownloader:
                 f"Warning: response may not be a supported file type. "
                 f"Content-Type: {content_type}"
             )
+        self._save_file(response.content, celex)
         self._link_mapper(celex)
-        return self._save_file(response.content, celex)
+        
 
     def _link_mapper(self, celex) -> Path:
         json_path = Path("JSON_LOGS/document_mapper.json")
