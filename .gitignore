@@ -11,6 +11,8 @@ pyproject.toml
 # Virtual environments
 .venv
 uv.lock
-pyproject.toml
+
 .env
 .idea
+JSON_LOGS
+eu_docs

@@ -50,15 +50,24 @@ class EurLexDownloader:
         headers = {
             "User-Agent": "Python EUR-Lex downloader/1.0"
         }
-
-        response = requests.get(
-            url,
-            headers=headers,
-            timeout=60,
-        )
-
-        response.raise_for_status()
-
+        try:
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=60,
+            )
+            response.raise_for_status()
+            
+        except requests.exceptions.HTTPError as errh:
+            print("HTTP Error")
+            raise print(errh.args[0])
+        except requests.exceptions.ReadTimeout as errrt:
+            raise print("Time out")
+        except requests.exceptions.ConnectionError as conerr:
+            raise print("Connection error")
+        except requests.exceptions.RequestException as errex:
+            raise print("Exception request")
+        
         content_type = response.headers.get("Content-Type", "")
 
         if file_type_end not in content_type.lower():
