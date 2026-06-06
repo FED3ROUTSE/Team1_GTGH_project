@@ -3,7 +3,7 @@ import dotenv
 from langchain_openai import ChatOpenAI
 
 class LlmFactory:
-    def __init__(self, localLlm=True, temperature=0.5):
+    def __init__(self, localLlm=True, temperature=0.7):
         self.temperature = temperature
         dotenv.load_dotenv() 
         if(localLlm):
