@@ -12,3 +12,4 @@ pyproject.toml
 .venv
 uv.lock
 pyproject.toml
+.env
