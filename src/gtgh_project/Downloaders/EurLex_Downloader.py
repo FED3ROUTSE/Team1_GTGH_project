@@ -29,7 +29,7 @@ class EurLexDownloader:
             f"?uri=CELEX:{celex}&from={self.language}"
         )
 
-    def _save_file(self, content: bytes, celex: str) -> Path:
+    def _save_file(self, content: bytes, celex: str):
         file_path = self.get_file_path(celex)
         file_path.write_bytes(content)
 
@@ -40,7 +40,7 @@ class EurLexDownloader:
     def exists(self, celex) -> bool:
         return self.get_file_path(celex).exists()
 
-    def download(self, celex) -> Path:
+    def download(self, celex):
         if self.exists(celex):
             print("File already exists. It will not be downloaded again.")
             return
@@ -83,7 +83,7 @@ class EurLexDownloader:
         self._link_mapper(celex)
         
 
-    def _link_mapper(self, celex) -> Path:
+    def _link_mapper(self, celex):
         json_path = Path("JSON_LOGS/document_mapper.json")
 
         if json_path.exists():

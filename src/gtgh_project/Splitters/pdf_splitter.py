@@ -1,31 +1,15 @@
 # import necessary libraries
-import json
-from pathlib import Path
 import pymupdf
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from hashlib import sha256
+from src.gtgh_project.Splitters.splitter import Splitter
 
-
-class PdfSplitter:
+class PdfSplitter(Splitter):
     def __init__(self):
-        json_path = Path("JSON_LOGS/document_mapper.json")
-        with open(json_path, "r", encoding="utf-8") as f:
-            self.urls = json.load(f)
-        self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-            is_separator_regex=True,
-            separators=["\n", "Article", r"\(\d+\)"],
-        )
+        super().__init__()
 
-    def get_url(self, pdf_path):
-        for celex_id in self.urls.keys():
-            if celex_id in pdf_path:
-                return self.urls[celex_id]
-
-    def split_pdf(self, pdf_path):
-        pdf_file = pymupdf.open(pdf_path)
-        url = self.get_url(pdf_path)
+    def split(self, file_path):
+        pdf_file = pymupdf.open(file_path)
+        url = self.get_url(file_path)
         chunks_list = []
 
         for page_num, page in enumerate(pdf_file):
@@ -36,7 +20,7 @@ class PdfSplitter:
             # Create chunks for this page
             for chunk_index, chunk in enumerate(chunks):
                 chunk_id_input = (
-                    f"{pdf_path}|{page_num}|{chunk_index}|{chunk_index + 1}"
+                    f"{file_path}|{page_num}|{chunk_index}|{chunk_index + 1}"
                 )
                 chunk_id = sha256(chunk_id_input.encode("utf-8")).hexdigest()
 
