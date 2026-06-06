@@ -13,3 +13,4 @@ pyproject.toml
 uv.lock
 pyproject.toml
 .env
+.idea
