@@ -60,13 +60,17 @@ class EurLexDownloader:
             
         except requests.exceptions.HTTPError as errh:
             print("HTTP Error")
-            raise print(errh.args[0])
+            print(errh.args[0])
+            raise errh
         except requests.exceptions.ReadTimeout as errrt:
-            raise print("Time out")
+            print("Time out")
+            raise errrt
         except requests.exceptions.ConnectionError as conerr:
-            raise print("Connection error")
+            print("Connection error")
+            raise conerr
         except requests.exceptions.RequestException as errex:
-            raise print("Exception request")
+            print("Exception request")
+            raise errex
         
         content_type = response.headers.get("Content-Type", "")
 
