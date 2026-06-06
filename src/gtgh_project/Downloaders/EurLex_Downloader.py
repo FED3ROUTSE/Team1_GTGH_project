@@ -7,12 +7,10 @@ import json
 class EurLexDownloader:
     def __init__(
         self,
-        celex_id: str,
         file_type: str = "PDF",
         language: str = "EN",
         out_dir: str = "eu_docs",
     ):
-        self.celex_id = celex_id
         self.language = language
         self.file_type = file_type.upper()
         self.out_dir = Path(out_dir)
@@ -20,32 +18,31 @@ class EurLexDownloader:
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
 
-        self._link_mapper()
 
     def _get_site_url(self) -> str:
         parsed = urlparse(self.base_url)
         return f"{parsed.scheme}://{parsed.netloc}"
 
-    def _build_url(self) -> str:
+    def _build_url(self, celex: str) -> str:
         return (
             f"{self.base_url}{self.file_type}/"
-            f"?uri=CELEX:{self.celex_id}&from={self.language}"
+            f"?uri=CELEX:{celex}&from={self.language}"
         )
 
-    def _save_file(self, content: bytes) -> Path:
-        file_path = self.get_file_path()
+    def _save_file(self, content: bytes, celex: str) -> Path:
+        file_path = self.get_file_path(celex)
         file_path.write_bytes(content)
         return file_path
 
-    def get_file_path(self) -> Path:
+    def get_file_path(self, celex: str) -> Path:
         file_type_end = self.file_type.lower()
-        return self.out_dir / f"{self.celex_id}_{self.language}.{file_type_end}"
+        return self.out_dir / f"{celex}_{self.language}.{file_type_end}"
 
     def exists(self) -> bool:
         return self.get_file_path().exists()
 
-    def download(self) -> Path:
-        url = self._build_url()
+    def download(self, celex) -> Path:
+        url = self._build_url(celex)
         file_type_end = self.file_type.lower()
 
         headers = {
@@ -67,10 +64,10 @@ class EurLexDownloader:
                 f"Warning: response may not be a supported file type. "
                 f"Content-Type: {content_type}"
             )
+        self._link_mapper(celex)
+        return self._save_file(response.content, celex)
 
-        return self._save_file(response.content)
-
-    def _link_mapper(self) -> Path:
+    def _link_mapper(self, celex) -> Path:
         json_path = Path("JSON_LOGS/document_mapper.json")
 
         if json_path.exists():
@@ -79,7 +76,7 @@ class EurLexDownloader:
         else:
             data = {}
 
-        data[self.celex_id] = self._get_site_url()
+        data[celex] = self._get_site_url()
 
         json_path.parent.mkdir(parents=True, exist_ok=True)
 
