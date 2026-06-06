@@ -11,6 +11,12 @@ class PdfSplitter:
         json_path = Path("JSON_LOGS/document_mapper.json")
         with open(json_path, "r", encoding="utf-8") as f:
             self.urls = json.load(f)
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            is_separator_regex=True,
+            separators=["\n", "Article", r"\(\d+\)"],
+        )
 
     def get_url(self, pdf_path):
         for celex_id in self.urls.keys():
@@ -21,17 +27,11 @@ class PdfSplitter:
         pdf_file = pymupdf.open(pdf_path)
         url = self.get_url(pdf_path)
         chunks_list = []
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-            is_separator_regex=True,
-            separators=["\n", "Article", r"\(\d+\)"],
-        )
 
         for page_num, page in enumerate(pdf_file):
 
             text = page.get_text()
-            chunks = text_splitter.split_text(text)
+            chunks = self.text_splitter.split_text(text)
 
             # Create chunks for this page
             for chunk_index, chunk in enumerate(chunks):

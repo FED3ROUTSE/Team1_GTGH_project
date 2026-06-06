@@ -20,4 +20,5 @@ if __name__ == "__main__":
     pdf_splitter = PdfSplitter()
     for file in os.listdir(folder):
         pdf_chunks = pdf_splitter.split_pdf(folder + "/" + file)
-        print(len(pdf_chunks))
+        print(pdf_chunks[0]["content"])
+        print("-"*30)
