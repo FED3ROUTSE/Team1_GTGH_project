@@ -4,6 +4,10 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from src.gtgh_project.Vectorization.embeddings import LocalEmbeddingModel
 from src.gtgh_project.RAGPipeline.rag import RAG
+from src.gtgh_project.LLMs.llm_factory import LlmFactory
+from src.gtgh_project.LLMs.rag_chain import RagChain
+from src.gtgh_project.LLMs.retriever import Retriever
+from src.gtgh_project.LLMs.system_prompt import get_system_prompt
 # import logging
 from src.gtgh_project.ChromaDB.vector_store import ChromaVectorStore
 from src.gtgh_project.config import (
@@ -43,7 +47,8 @@ vector_store = ChromaVectorStore(
     collection_name=COLLECTION_NAME,
 )
 
-rag = RAG()
+rag_chain = RagChain(local_llm=False)
+rag_engine = Retriever(embedding_model=embedding_model, vector_store=vector_store, llm = rag_chain, top_k = TOP_K)
 
 
 class QueryRequest(BaseModel):
@@ -59,26 +64,8 @@ class QueryResponse(BaseModel):
 @app.post("/query")
 def query(request: QueryRequest):
     try:
-        answer_text = rag.query(request.question)
-
-        retrieved_chunks = []
-        try:
-            query_embedding = rag.embedding_model.embed_query(request.question)
-            results = rag.vector_store.search(query_embedding, top_k=5)
-
-            for result in results:
-                retrieved_chunks.append({
-                    "content": result['content'],
-                    "metadata": result.get('metadata', {})
-                })
-        except:
-            pass
-
-        return {
-            "question": request.question,
-            "answer": answer_text,
-            "retrieved_chunks": retrieved_chunks
-        }
+        result = rag_engine.ask(request.question)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
