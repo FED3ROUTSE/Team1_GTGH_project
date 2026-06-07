@@ -1,4 +1,3 @@
-# import necessary libraries
 import pymupdf
 from hashlib import sha256
 from src.gtgh_project.Splitters.splitter import Splitter

@@ -5,15 +5,10 @@ import json
 
 
 class EurLexDownloader:
-    def __init__(
-        self,
-        file_type: str = "PDF",
-        language: str = "EN",
-        out_dir: str = "eu_docs",
-    ):
+    def __init__(self, file_type: str, language: str, out_dir: Path):
         self.language = language
-        self.file_type = file_type.upper()
-        self.out_dir = Path(out_dir)
+        self.file_type = file_type
+        self.out_dir = out_dir
         self.base_url = "https://eur-lex.europa.eu/legal-content/EN/TXT/"
 
         self.out_dir.mkdir(parents=True, exist_ok=True)

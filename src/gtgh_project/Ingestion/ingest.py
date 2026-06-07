@@ -2,15 +2,15 @@ from src.gtgh_project.Vectorization.embeddings import LocalEmbeddingModel
 from src.gtgh_project.Downloaders.EurLex_Downloader import EurLexDownloader
 from src.gtgh_project.Splitters.splitter_factory import SplitterFactory
 from src.gtgh_project.ChromaDB.vector_store import ChromaVectorStore
-from src.gtgh_project.config import (EMBEDDING_MODEL_NAME, VECTOR_DIR,
-COLLECTION_NAME, CELEX_LIST, DOCS_DIR, VECTOR_DIR, FILE_TYPE)
+from src.gtgh_project.config import (EMBEDDING_MODEL_NAME,
+COLLECTION_NAME, CELEX_LIST, DOCS_DIR, VECTOR_DIR, FILE_TYPE,
+LANGUAGE)
 import os 
 import requests
-from pathlib import Path
 
 def run_ingestion():
     failed_downloads = []
-    downloader = EurLexDownloader(file_type = FILE_TYPE)
+    downloader = EurLexDownloader(file_type = FILE_TYPE, language = LANGUAGE, out_dir=DOCS_DIR)
 
     for celex in CELEX_LIST:
         try:
