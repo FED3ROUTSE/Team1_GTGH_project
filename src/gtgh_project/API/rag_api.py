@@ -3,7 +3,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from src.gtgh_project.Vectorization.embeddings import LocalEmbeddingModel
-from src.gtgh_project.RAGPipeline.rag import RAG
 from src.gtgh_project.LLMs.llm_factory import LlmFactory
 from src.gtgh_project.LLMs.rag_chain import RagChain
 from src.gtgh_project.LLMs.retriever import Retriever
@@ -18,6 +17,8 @@ from src.gtgh_project.config import (
     CHUNK_SIZE,
     CHUNK_OVERLAP,
     TOP_K,
+    LOCAL, 
+    TEMPERATURE
 )
 from pathlib import Path
 
@@ -47,7 +48,7 @@ vector_store = ChromaVectorStore(
     collection_name=COLLECTION_NAME,
 )
 
-rag_chain = RagChain(local_llm=False)
+rag_chain = RagChain(local_llm=LOCAL, temperature=TEMPERATURE)
 rag_engine = Retriever(embedding_model=embedding_model, vector_store=vector_store, llm = rag_chain, top_k = TOP_K)
 
 

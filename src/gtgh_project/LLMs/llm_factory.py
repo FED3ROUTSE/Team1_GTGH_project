@@ -1,22 +1,23 @@
 import os
 import dotenv
 from langchain_openai import ChatOpenAI
-
+from src.gtgh_project.config import (LOCAL_AI_API_KEY, LOCAL_AI_ENDPOINT,
+LOCAL_AI_MODEL, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_VERSION,
+AZURE_OPENAI_DEPLOYMENT_NAME)
 class LlmFactory:
-    def __init__(self, localLlm=True, temperature=0.7):
+    def __init__(self, localLlm, temperature):
         self.temperature = temperature
-        dotenv.load_dotenv() 
-        if(localLlm):
+        if localLlm:
             config = {
-                "api_key": os.getenv("AI_API_KEY", "my-secret-key"),
-                "base_url": os.getenv("AI_ENDPOINT", "http://localhost:4000"),
-                "model": os.getenv("AI_MODEL", "gpt-4-turbo")
+                "api_key": LOCAL_AI_API_KEY,
+                "base_url": LOCAL_AI_ENDPOINT,
+                "model": LOCAL_AI_MODEL
             }
         else:
             config = {
-                "api_key": os.getenv("GROQ_API_KEY"),
-                "base_url": os.getenv("GROQ_ENDPOINT", "https://api.groq.com/openai/v1"),
-                "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+                "api_key": AZURE_OPENAI_API_KEY,
+                "base_url": AZURE_OPENAI_ENDPOINT,
+                "model": AZURE_OPENAI_DEPLOYMENT_NAME
             }
         self.__create_llm(config)
 

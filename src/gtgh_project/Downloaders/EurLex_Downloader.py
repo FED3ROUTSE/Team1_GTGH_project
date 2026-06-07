@@ -42,7 +42,7 @@ class EurLexDownloader:
 
     def download(self, celex):
         if self.exists(celex):
-            print("File already exists. It will not be downloaded again.")
+            print(f"File {celex}_{self.language}.{self.file_type.lower()} already exists. It will not be downloaded again.")
             return
         url = self._build_url(celex)
         file_type_end = self.file_type.lower()
