@@ -10,7 +10,7 @@ import requests
 
 def run_ingestion():
     failed_downloads = []
-    downloader = EurLexDownloader(file_type = FILE_TYPE, language = LANGUAGE, out_dir=DOCS_DIR)
+    downloader = EurLexDownloader(file_type = FILE_TYPE, language = LANGUAGE, out_dir = DOCS_DIR)
 
     for celex in CELEX_LIST:
         try:

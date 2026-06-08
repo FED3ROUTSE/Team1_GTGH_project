@@ -87,7 +87,7 @@ class EurLexDownloader:
         else:
             data = {}
 
-        data[celex] = self._get_site_url()
+        data[celex] = self._build_url(celex)
 
         json_path.parent.mkdir(parents=True, exist_ok=True)
 

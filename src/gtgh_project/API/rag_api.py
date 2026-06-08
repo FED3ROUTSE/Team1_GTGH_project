@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -36,7 +35,6 @@ vector_store = ChromaVectorStore(
     persist_path=VECTOR_DIR,
     collection_name=COLLECTION_NAME,
 )
-
 rag_chain = RagChain(local_llm=LOCAL, temperature=TEMPERATURE)
 rag_engine = Retriever(embedding_model=embedding_model, vector_store=vector_store, llm = rag_chain, top_k = TOP_K)
 print(rag_engine.llm)
