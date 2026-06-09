@@ -13,6 +13,8 @@ class EurLexDownloader:
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
 
+        self.caution_response_type = False
+
 
     def _get_site_url(self) -> str:
         parsed = urlparse(self.base_url)
@@ -37,8 +39,7 @@ class EurLexDownloader:
 
     def download(self, celex):
         if self.exists(celex):
-            print(f"File {celex}_{self.language}.{self.file_type.lower()} already exists. It will not be downloaded again.")
-            return
+            return True
         url = self._build_url(celex)
         file_type_end = self.file_type.lower()
 
@@ -70,10 +71,7 @@ class EurLexDownloader:
         content_type = response.headers.get("Content-Type", "")
 
         if file_type_end not in content_type.lower():
-            print(
-                f"Warning: response may not be a supported file type. "
-                f"Content-Type: {content_type}"
-            )
+            self.caution_response_type = True
         self._save_file(response.content, celex)
         self._link_mapper(celex)
         
