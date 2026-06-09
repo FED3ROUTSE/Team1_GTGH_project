@@ -36,7 +36,7 @@ vector_store = ChromaVectorStore(
     collection_name=COLLECTION_NAME,
 )
 rag_chain = RagChain(local_llm=LOCAL, temperature=TEMPERATURE)
-rag_engine = Retriever(embedding_model=embedding_model, vector_store=vector_store, llm = rag_chain, top_k = TOP_K)
+rag_engine = Retriever(embedding_model=embedding_model, vector_store=vector_store, llm = rag_chain, top_k = TOP_K, fetch_k=20, lambda_mult=0.6)
 print(rag_engine.llm)
 
 class QueryRequest(BaseModel):
