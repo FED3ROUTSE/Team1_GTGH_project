@@ -18,8 +18,9 @@ fh = logging.FileHandler(str(log_file))
 fh.setLevel(logging.INFO)
 
 # Create formatter and add it to file handler
+script = "ingest.py"
 formatter = logging.Formatter(
-    '%(asctime)s|%(name)s|%(levelname)s|%(message)s'
+    f'%(asctime)s|{script}|%(levelname)s|%(message)s'
 )
 fh.setFormatter(formatter)
 
@@ -27,8 +28,7 @@ fh.setFormatter(formatter)
 if not logger.handlers:
     logger.addHandler(fh)
 
-logger.info("Ingestion started")
-logger.info("")
+logger.info("\nIngestion started\n")
 
 from src.gtgh_project.Vectorization.embeddings import LocalEmbeddingModel
 from src.gtgh_project.Downloaders.EurLex_Downloader import EurLexDownloader
@@ -53,19 +53,23 @@ def run_ingestion():
 
     for celex in CELEX_LIST:
         try:
-            downloader.download(celex)
-            logger.info(f"Document downloaded | celex_id={celex}")
+            already_exists = downloader.download(celex)
+            if already_exists:
+                logger.info(f"Document with celex ID: {celex} already exists")
+            else:
+                logger.info(f"Document downloaded | celex_id={celex}")
         except requests.exceptions.RequestException as e:
             logger.error(e)
             print(f"Download failed | celex_id={celex}")
             failed_downloads.append(celex)
+        if downloader.caution_response_type:
+            logger.warning(f"Warning: response may not be a supported file type")
 
     if failed_downloads:
         for celex in failed_downloads:
             logger.warning(f"Document with celex ID: {celex} failed to download")
 
-    logger.info("Document download completed")
-    logger.info("")
+    logger.info("Document download completed\n")
 
     logger.info("Document chunking started")
     splitter = SplitterFactory(downloader.file_type).get_splitter()
@@ -84,11 +88,10 @@ def run_ingestion():
         except Exception as e:
             logger.warning(f"File chunking failed | filename={file} | error={e}")
             print(f"File {file} could not be split")
-    
+
     texts.extend(chunk["content"] for chunk in file_chunks)
 
-    logger.info("Document chunking completed")
-    logger.info("")
+    logger.info("Document chunking completed\n")
 
     logger.info("Embedding generation started")
     model = LocalEmbeddingModel(EMBEDDING_MODEL_NAME)
@@ -100,9 +103,8 @@ def run_ingestion():
 
     db = ChromaVectorStore(str(VECTOR_DIR), COLLECTION_NAME)
     db.add_chunks(file_chunks, embeddings)
-    logger.info("Embedding generation completed")
-    logger.info("")
-    
+    logger.info("Embedding generation completed\n")
+
     logger.info("Ingestion completed")
 
 if __name__ == "__main__":
