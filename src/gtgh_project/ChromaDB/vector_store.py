@@ -1,6 +1,7 @@
 import chromadb
 from chromadb.config import Settings
-
+from langchain_community.vectorstores.utils import maximal_marginal_relevance as mmr
+import numpy as np
 
 class ChromaVectorStore:
     """
@@ -8,7 +9,6 @@ class ChromaVectorStore:
     """
 
     def __init__(self, persist_path: str, collection_name: str):
-
         # Data saved to disk to survive restarts
         self.client = chromadb.PersistentClient(
             path=persist_path,
@@ -49,34 +49,47 @@ class ChromaVectorStore:
         )
 
 
-    def search(self, query_embedding: list[float], top_k: int = 5):
+    def search(self, query_embedding: list[float], top_k: int = 5, fetch_k: int = 20, lambda_mult: float = 0.6):
 
         """
         Search for similar (to query embedding) chunks
         """
-
         # Query the collection with the embedding
         results = self.collection.query(
-            query_embeddings=[query_embedding],     # method expects a list of queries, even if only one is passed
-            n_results=top_k,
+            query_embeddings=[query_embedding],    
+            n_results=fetch_k,
+            include=["embeddings", "documents", "metadatas", "distances"]
         )
 
         retrieved = []
 
-        ids = results["ids"][0]                     # method returns a list as well, hence we take the first (and only)
-                                                    # result
+        ids = results["ids"][0]                   
+        embeddings  = results["embeddings"][0]                                  
         documents = results["documents"][0]
         metadatas = results["metadatas"][0]
         distances = results["distances"][0]
+        
+        
 
-        # Reconstruct each result as a dictionary
-        for i in range(len(ids)):
+        selected_indices = mmr(
+            query_embedding=np.array(query_embedding),
+            embedding_list=np.array(embeddings),
+            lambda_mult=lambda_mult,
+            k=top_k
+        )
+        
+        embedding_list = embeddings.tolist()
+        
+        
+        for i in selected_indices:
+            i = int(i)
             retrieved.append(
                 {
                     "chunk_id": ids[i],
                     "content": documents[i],
                     "metadata": metadatas[i],
-                    "distance": distances[i],
+                    "distance": float(distances[i]),
+                    "embedding": embedding_list[i]
                 }
             )
 

@@ -1,9 +1,11 @@
 class Retriever:
-    def __init__(self, embedding_model, vector_store, llm, top_k):
+    def __init__(self, embedding_model, vector_store, llm, top_k, fetch_k, lambda_mult):
         self.embedding_model = embedding_model
         self.vector_store = vector_store
         self.llm = llm
         self.top_k = top_k
+        self.fetch_k = fetch_k
+        self.lambda_mult = lambda_mult
         
     def _retrieve(self, question: str):
         query_embedding = self.embedding_model.embed_query(question)
@@ -11,6 +13,8 @@ class Retriever:
         results = self.vector_store.search(
             query_embedding=query_embedding,
             top_k=self.top_k,
+            fetch_k = self.fetch_k,
+            lambda_mult = self.lambda_mult,
         )
         
         return results 
