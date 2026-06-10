@@ -13,3 +13,6 @@ JSON_LOGS
 eu_docs
 Vector DB Folder 
 data
+requirements.txt
+pipeline.yml
+databricks.yml

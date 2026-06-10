@@ -9,6 +9,7 @@ from src.gtgh_project.ChromaDB.vector_store import ChromaVectorStore
 from src.gtgh_project.config import (VECTOR_DIR, COLLECTION_NAME, EMBEDDING_MODEL_NAME,
 TOP_K, LOCAL, TEMPERATURE)
 from pathlib import Path
+from src.gtgh_project.Ingestion import ingest
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -48,6 +49,8 @@ class QueryResponse(BaseModel):
     answer: str
     retrieved_chunks: list
 
+class IngestRequest(BaseModel):
+    celex_list: list[str]
 
 @app.post("/query")
 def query(request: QueryRequest):
@@ -57,6 +60,12 @@ def query(request: QueryRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.put("/ingest")
+def ingest(request: IngestRequest):
+    try:
+        ingest.run_ingestion(request.celex_list)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_frontend():

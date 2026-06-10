@@ -1,0 +1,12 @@
+/__pycache__/
+/*.py[oc]
+/build/
+/dist/
+/wheels/
+/*.egg-info
+/.venv
+/.env
+/.idea
+/JSON_LOGS
+/eu_docs
+/Vector DB Folder

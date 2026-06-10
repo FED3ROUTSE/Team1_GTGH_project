@@ -1,4 +1,4 @@
-
+import sys
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -52,8 +52,9 @@ logger.info(f"Configuration | VECTOR_DIR={VECTOR_DIR}")
 
 
 
-def run_ingestion():
-
+def run_ingestion(celex_list = None):
+    if celex_list is not None:
+        sys.modules['src.gtgh_project.config'].CELEX_LIST = celex_list
     logger.info("\n\nPhase 1: Documents download")
     failed_downloads = []
     try:
