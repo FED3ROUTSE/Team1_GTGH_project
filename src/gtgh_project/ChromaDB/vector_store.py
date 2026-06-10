@@ -14,7 +14,7 @@ class ChromaVectorStore:
         #     path=persist_path,
         #     settings=Settings(anonymized_telemetry=False)
         # )
-        self.client = chromadb.HttpClient(host= "chroma-db", port = 8000, database = "chromadb")
+        self.client = chromadb.HttpClient(host="chroma-db", port = 8000, database = "chromadb")
         # Get existing collection, or create new one if it doesn't exist / use cos distance for semantic search
         self.collection = self.client.get_or_create_collection(
             name=collection_name,
