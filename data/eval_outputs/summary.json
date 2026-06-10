@@ -1,0 +1,13 @@
+{
+  "sut_model": "gpt-4-turbo",
+  "judge_model": "gpt-4-turbo",
+  "dataset": "Golden_dataset/gold_dataset.jsonl",
+  "num_cases": 18,
+  "pass_rate": 0.9444444444444444,
+  "avg_relevance": 5.0,
+  "avg_faithfulness_over_context": 4.722222222222222,
+  "duration_sec": 147.856,
+  "failed_cases": [
+    "32022R2554"
+  ]
+}

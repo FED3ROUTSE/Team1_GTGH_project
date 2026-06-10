@@ -1,0 +1,31 @@
+2026-06-10 11:25:01,261|ingest.py|INFO|
+Ingestion started
+
+2026-06-10 11:25:09,733|ingest.py|INFO|Document download started
+2026-06-10 11:25:09,738|ingest.py|INFO|Document with celex ID: 32022R2554 already exists
+2026-06-10 11:25:09,738|ingest.py|INFO|Document with celex ID: 32022R0868 already exists
+2026-06-10 11:25:09,738|ingest.py|INFO|Document with celex ID: 32023R2854 already exists
+2026-06-10 11:25:09,738|ingest.py|INFO|Document with celex ID: 32022L2555 already exists
+2026-06-10 11:25:09,738|ingest.py|INFO|Document with celex ID: 32024R1689 already exists
+2026-06-10 11:25:09,738|ingest.py|INFO|Document with celex ID: 32019L1024 already exists
+2026-06-10 11:25:09,738|ingest.py|INFO|Document download completed
+
+2026-06-10 11:25:09,738|ingest.py|INFO|Document chunking started
+2026-06-10 11:25:09,802|ingest.py|INFO|File 32019L1024_EN.html chunked | Total chunks=1
+2026-06-10 11:25:09,802|ingest.py|WARNING|Skipping file | filename=32019L1024_EN.pdf | extension=pdf | reason=validation_failed
+2026-06-10 11:25:09,829|ingest.py|INFO|File 32022L2555_EN.html chunked | Total chunks=2
+2026-06-10 11:25:09,829|ingest.py|WARNING|Skipping file | filename=32022L2555_EN.pdf | extension=pdf | reason=validation_failed
+2026-06-10 11:25:09,851|ingest.py|INFO|File 32022R0868_EN.html chunked | Total chunks=3
+2026-06-10 11:25:09,851|ingest.py|WARNING|Skipping file | filename=32022R0868_EN.pdf | extension=pdf | reason=validation_failed
+2026-06-10 11:25:09,889|ingest.py|INFO|File 32022R2554_EN.html chunked | Total chunks=4
+2026-06-10 11:25:09,889|ingest.py|WARNING|Skipping file | filename=32022R2554_EN.pdf | extension=pdf | reason=validation_failed
+2026-06-10 11:25:09,912|ingest.py|INFO|File 32023R2854_EN.html chunked | Total chunks=5
+2026-06-10 11:25:09,912|ingest.py|WARNING|Skipping file | filename=32023R2854_EN.pdf | extension=pdf | reason=validation_failed
+2026-06-10 11:25:09,939|ingest.py|INFO|File 32024R1689_EN.html chunked | Total chunks=6
+2026-06-10 11:25:09,939|ingest.py|WARNING|Skipping file | filename=32024R1689_EN.pdf | extension=pdf | reason=validation_failed
+2026-06-10 11:25:09,939|ingest.py|INFO|Document chunking completed
+
+2026-06-10 11:25:09,939|ingest.py|INFO|Embedding generation started
+2026-06-10 11:25:13,857|ingest.py|INFO|Embedding generation completed
+
+2026-06-10 11:25:13,857|ingest.py|INFO|Ingestion completed
