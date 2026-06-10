@@ -8,7 +8,7 @@ class PdfSplitter(Splitter):
         super().__init__()
 
     
-
+    @staticmethod
     def extract_pdf_metadata(text: str):
         
         # Find the date with its surrounding context
@@ -39,7 +39,7 @@ class PdfSplitter(Splitter):
         # remove any trailing " (Text with EEA relevance)" if present
         title = re.sub(r'\s*\(Text with EEA relevance\)\s*$', '', title)
 
-        return title, date_match.group(1)
+        return title, date_match.group()
 
     def split(self, file_path):
         pdf_file = pymupdf.open(file_path)
