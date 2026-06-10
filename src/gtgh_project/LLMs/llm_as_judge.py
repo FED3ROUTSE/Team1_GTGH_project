@@ -24,9 +24,9 @@ TOP_K, LOCAL, TEMPERATURE)
 
  
 
-sut_llm = LlmFactory(False, 0.7).get_llm()  # (System Under Test), the "candidate" whose performance, accuracy, or safety you want to measure.
+sut_llm = RagChain(local_llm=LOCAL, temperature=0.0)
 
-judge_llm = LlmFactory(False, 0.7).get_llm()
+judge_llm = LlmFactory(False, 0.0).get_llm()
 
 SUT_SYSTEM = """You are a helpful assistant.
 If context is provided, use it as the primary source of truth.
@@ -109,7 +109,10 @@ Answer the question."""
         SystemMessage(content=SUT_SYSTEM), # added as system prompt so that LLM knows the rules, also if there are multiple invocations of the LLM, we need to add system message everytime (or every now and then) to remind it of the rules
         HumanMessage(content=user_content),
     ]
-    return sut_llm.invoke(messages).content.strip()
+    return sut_llm.invoke(
+        question=case.question,
+        context=case.context,
+    )
 
 # =========================
 # Judge (LLM evaluation)
