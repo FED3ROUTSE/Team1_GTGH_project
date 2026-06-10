@@ -1,0 +1,9 @@
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:42|<module>|Configuration | ROOT=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:43|<module>|Configuration | LOGS_DIR=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\LOGS
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:44|<module>|Configuration | EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:45|<module>|Configuration | COLLECTION_NAME=pdf_rag_collection
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:46|<module>|Configuration | CELEX_LIST=['32022R2554', '32022R0868', '32023R2854', '32022L2555', '32024R1689', '32019L1024']
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:47|<module>|Configuration | FILE_TYPE=PDF
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:48|<module>|Configuration | LANGUAGE=EN
+2026-06-10 22:29:26,860|ingest.py|INFO|ingest.py:49|<module>|Configuration | DOCS_DIR=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\eu_docs
+2026-06-10 22:29:26,861|ingest.py|INFO|ingest.py:50|<module>|Configuration | VECTOR_DIR=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\Vector DB Folder

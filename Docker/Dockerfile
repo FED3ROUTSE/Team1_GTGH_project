@@ -6,4 +6,4 @@ RUN pip install uv
 
 COPY . .
 
-CMD ["uv", "sync"]
+CMD ["uv", "sync", "--frozen", "--no-dev"]

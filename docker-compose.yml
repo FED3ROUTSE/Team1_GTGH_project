@@ -1,0 +1,94 @@
+name: ai_stack
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - rag_net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  model-puller:
+    image: alpine/curl:latest
+    container_name: model-puller
+    depends_on:
+      - ollama
+    command: >
+      sh -c "
+        echo 'Waiting for Ollama to start...';
+        while ! curl -s http://ollama:11434 > /dev/null; do
+          sleep 1;
+        done;
+        echo 'Ollama is up! Pulling models...';
+        curl http://ollama:11434/api/pull -d '{ \"name\": \"llama3\" }';
+        curl http://ollama:11434/api/pull -d '{ \"name\": \"all-minilm\" }';
+        echo 'Model pulling complete.';
+      "
+    networks:
+      - rag_net
+    restart: on-failure
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm-proxy
+    depends_on:
+      - ollama
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./config.yaml:/config.yaml
+    networks:
+      - rag_net
+    command: ["--config", "/config.yaml", "--port", "4000"]
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:4000/health')\" || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  chroma-db:
+    image: chromadb/chroma:latest
+    container_name: chroma-db
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma/
+    networks:
+      - rag_net
+    restart: always
+
+  my_app:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile
+    container_name: my_rag_api
+    depends_on:
+      litellm:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    command: uv run uvicorn --port 8080 --host 0.0.0.0 src.gtgh_project.API.rag_api:app
+    networks:
+      - rag_net
+
+volumes:
+  ollama_data:
+  chroma_data:
+
+networks:
+  rag_net:
+    driver: bridge

@@ -10,11 +10,11 @@ class ChromaVectorStore:
 
     def __init__(self, persist_path: str, collection_name: str):
         # Data saved to disk to survive restarts
+        self.client = chromadb.HttpClient(host="chroma-db", port = 8000)
         # self.client = chromadb.PersistentClient(
         #     path=persist_path,
         #     settings=Settings(anonymized_telemetry=False)
         # )
-        self.client = chromadb.HttpClient(host="chroma-db", port = 8000, database = "chromadb")
         # Get existing collection, or create new one if it doesn't exist / use cos distance for semantic search
         self.collection = self.client.get_or_create_collection(
             name=collection_name,

@@ -1,0 +1,54 @@
+2026-06-10 22:27:31,548|ingest.py|INFO|ingest.py:42|<module>|Configuration | ROOT=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project
+2026-06-10 22:27:31,548|ingest.py|INFO|ingest.py:43|<module>|Configuration | LOGS_DIR=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\LOGS
+2026-06-10 22:27:31,548|ingest.py|INFO|ingest.py:44|<module>|Configuration | EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+2026-06-10 22:27:31,548|ingest.py|INFO|ingest.py:45|<module>|Configuration | COLLECTION_NAME=pdf_rag_collection
+2026-06-10 22:27:31,548|ingest.py|INFO|ingest.py:46|<module>|Configuration | CELEX_LIST=['32022R2554', '32022R0868', '32023R2854', '32022L2555', '32024R1689', '32019L1024']
+2026-06-10 22:27:31,548|ingest.py|INFO|ingest.py:47|<module>|Configuration | FILE_TYPE=PDF
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:48|<module>|Configuration | LANGUAGE=EN
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:49|<module>|Configuration | DOCS_DIR=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\eu_docs
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:50|<module>|Configuration | VECTOR_DIR=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\Vector DB Folder
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:58|run_ingestion|
+
+Phase 1: Documents download
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:62|run_ingestion|Initializing EurLexDownloader | file_type=PDF | language=EN | out_dir=C:\Users\ciqas\Documents\ACCENTURE_GTGH\Team1_GTGH_project\eu_docs
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:67|run_ingestion|Starting downloads for 6 documents | celex_ids=['32022R2554', '32022R0868', '32023R2854', '32022L2555', '32024R1689', '32019L1024']
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:70|run_ingestion|Download attempt 0/6 | celex_id=32022R2554
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:74|run_ingestion|Document already exists | celex_id=32022R2554 | progress=0/6
+2026-06-10 22:27:31,549|ingest.py|INFO|ingest.py:70|run_ingestion|Download attempt 1/6 | celex_id=32022R0868
+2026-06-10 22:27:31,550|ingest.py|INFO|ingest.py:74|run_ingestion|Document already exists | celex_id=32022R0868 | progress=1/6
+2026-06-10 22:27:31,550|ingest.py|INFO|ingest.py:70|run_ingestion|Download attempt 2/6 | celex_id=32023R2854
+2026-06-10 22:27:31,550|ingest.py|INFO|ingest.py:74|run_ingestion|Document already exists | celex_id=32023R2854 | progress=2/6
+2026-06-10 22:27:31,550|ingest.py|INFO|ingest.py:70|run_ingestion|Download attempt 3/6 | celex_id=32022L2555
+2026-06-10 22:27:31,550|ingest.py|INFO|ingest.py:74|run_ingestion|Document already exists | celex_id=32022L2555 | progress=3/6
+2026-06-10 22:27:31,550|ingest.py|INFO|ingest.py:70|run_ingestion|Download attempt 4/6 | celex_id=32024R1689
+2026-06-10 22:27:31,551|ingest.py|INFO|ingest.py:74|run_ingestion|Document already exists | celex_id=32024R1689 | progress=4/6
+2026-06-10 22:27:31,551|ingest.py|INFO|ingest.py:70|run_ingestion|Download attempt 5/6 | celex_id=32019L1024
+2026-06-10 22:27:31,551|ingest.py|INFO|ingest.py:74|run_ingestion|Document already exists | celex_id=32019L1024 | progress=5/6
+2026-06-10 22:27:31,551|ingest.py|INFO|ingest.py:90|run_ingestion|
+
+Phase 2: Document Chunking
+2026-06-10 22:27:31,551|ingest.py|INFO|ingest.py:92|run_ingestion|Creating splitter | file_type=PDF
+2026-06-10 22:27:31,551|ingest.py|INFO|ingest.py:94|run_ingestion|Splitter created | type=PdfSplitter
+2026-06-10 22:27:31,552|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32016R0679_EN.pdf
+2026-06-10 22:27:31,763|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32016R0679_EN.pdf | chunks_added=469 | total_chunks_so_far=469
+2026-06-10 22:27:31,763|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32019L1024_EN.pdf
+2026-06-10 22:27:31,872|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32019L1024_EN.pdf | chunks_added=137 | total_chunks_so_far=606
+2026-06-10 22:27:31,873|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32022L2555_EN.pdf
+2026-06-10 22:27:32,064|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32022L2555_EN.pdf | chunks_added=364 | total_chunks_so_far=970
+2026-06-10 22:27:32,064|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32022R0868_EN.pdf
+2026-06-10 22:27:32,202|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32022R0868_EN.pdf | chunks_added=244 | total_chunks_so_far=1214
+2026-06-10 22:27:32,202|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32022R2554_EN.pdf
+2026-06-10 22:27:32,406|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32022R2554_EN.pdf | chunks_added=407 | total_chunks_so_far=1621
+2026-06-10 22:27:32,406|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32023R2854_EN.pdf
+2026-06-10 22:27:32,583|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32023R2854_EN.pdf | chunks_added=382 | total_chunks_so_far=2003
+2026-06-10 22:27:32,583|ingest.py|INFO|ingest.py:100|run_ingestion|Processing file: 32024R1689_EN.pdf
+2026-06-10 22:27:33,022|ingest.py|INFO|ingest.py:109|run_ingestion|File chunked successfully | filename=32024R1689_EN.pdf | chunks_added=775 | total_chunks_so_far=2778
+2026-06-10 22:27:33,022|ingest.py|INFO|ingest.py:119|run_ingestion|
+
+Phase 3: Embedding Generation
+2026-06-10 22:27:36,502|ingest.py|INFO|ingest.py:123|run_ingestion|Generating embeddings for 2778 text segments
+2026-06-10 22:28:45,148|ingest.py|INFO|ingest.py:125|run_ingestion|Embeddings generated successfully | count=2778
+2026-06-10 22:28:45,148|ingest.py|INFO|ingest.py:131|run_ingestion|Phase 4: Vector Storage
+2026-06-10 22:28:45,850|ingest.py|INFO|ingest.py:135|run_ingestion|Adding 2778 chunks with embeddings to database
+2026-06-10 22:28:45,850|ingest.py|INFO|ingest.py:137|run_ingestion|Vector storage completed successfully
+2026-06-10 22:28:45,850|ingest.py|INFO|ingest.py:139|run_ingestion|Ingestion completed

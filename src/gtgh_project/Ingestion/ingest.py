@@ -43,7 +43,7 @@ logger.info(f"Configuration | ROOT={ROOT}")
 logger.info(f"Configuration | LOGS_DIR={LOGS_DIR}")
 logger.info(f"Configuration | EMBEDDING_MODEL_NAME={EMBEDDING_MODEL_NAME}")
 logger.info(f"Configuration | COLLECTION_NAME={COLLECTION_NAME}")
-logger.info(f"Configuration | CELEX_LIST={CELEX_LIST}")
+# logger.info(f"Configuration | CELEX_LIST={CELEX_LIST}")
 logger.info(f"Configuration | FILE_TYPE={FILE_TYPE}")
 logger.info(f"Configuration | LANGUAGE={LANGUAGE}")
 logger.info(f"Configuration | DOCS_DIR={DOCS_DIR}")
@@ -52,9 +52,11 @@ logger.info(f"Configuration | VECTOR_DIR={VECTOR_DIR}")
 
 
 
-def run_ingestion(celex_list = None):
-    if celex_list is not None:
-        sys.modules['src.gtgh_project.config'].CELEX_LIST = celex_list
+def run_ingestion(celex_list_user = None):
+    if celex_list_user is not None:
+        celex_list = celex_list_user
+    else:
+        celex_list = CELEX_LIST
     logger.info("\n\nPhase 1: Documents download")
     failed_downloads = []
     try:
@@ -64,18 +66,18 @@ def run_ingestion(celex_list = None):
         logger.error(f"Failed to initialize downloader | error={e}")
         raise
 
-    logger.info(f"Starting downloads for {len(CELEX_LIST)} documents | celex_ids={CELEX_LIST}")
-    for idx, celex in enumerate(CELEX_LIST):
+    logger.info(f"Starting downloads for {len(celex_list)} documents | celex_ids={celex_list}")
+    for idx, celex in enumerate(celex_list):
 
-        logger.info(f"Download attempt {idx}/{len(CELEX_LIST)} | celex_id={celex}")
+        logger.info(f"Download attempt {idx}/{len(celex_list)} | celex_id={celex}")
         try:
             already_exists = downloader.download(celex)
             if already_exists:
-                logger.info(f"Document already exists | celex_id={celex} | progress={idx}/{len(CELEX_LIST)}")
+                logger.info(f"Document already exists | celex_id={celex} | progress={idx}/{len(celex_list)}")
             else:
-                logger.info(f"Document downloaded successfully | celex_id={celex} | progress={idx}/{len(CELEX_LIST)}")
+                logger.info(f"Document downloaded successfully | celex_id={celex} | progress={idx}/{len(celex_list)}")
         except requests.exceptions.RequestException as e:
-            logger.warning(f"Download failed | celex_id={celex} | progress={idx}/{len(CELEX_LIST)} | error={type(e).__name__}")
+            logger.warning(f"Download failed | celex_id={celex} | progress={idx}/{len(celex_list)} | error={type(e).__name__}")
             logger.error(f"Download error details | celex_id={celex} | error={str(e)}")
             failed_downloads.append(celex)
         if downloader.caution_response_type:
@@ -100,11 +102,11 @@ def run_ingestion(celex_list = None):
         logger.info(f"Processing file: {file}")
 
         name, extension = file.split(".")
-        if extension!=downloader.file_type.lower(): # or name[:-3] not in CELEX_LIST:
+        if extension!=downloader.file_type.lower(): # or name[:-3] not in celex_list:
             logger.warning(f"Skipping file | filename={file} | extension={extension} | reason=validation_failed")
             continue
         try:
-            chunks = splitter.split(file_path = str(DOCS_DIR).split("\\")[-1] + "\\" + file)
+            chunks = splitter.split(file_path = DOCS_DIR.name + "/" + file)
             file_chunks += chunks
             logger.info(
                 f"File chunked successfully | filename={file} | chunks_added={len(chunks)} | total_chunks_so_far={len(file_chunks)}")
