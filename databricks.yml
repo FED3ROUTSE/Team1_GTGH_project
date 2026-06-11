@@ -1,0 +1,13 @@
+bundle:
+  name: project
+
+include:
+  - resources/*.yml
+
+targets:
+
+  dev:
+    mode: development
+
+    workspace:
+      host: https://adb-7405617412243394.14.azuredatabricks.net
