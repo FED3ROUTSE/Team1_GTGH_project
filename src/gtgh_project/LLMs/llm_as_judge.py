@@ -22,10 +22,10 @@ TOP_K, LOCAL, TEMPERATURE)
 # Configuration / Models
 # =========================
 
- 
-
+# Αρχικοποιούμε το RagChain για το System Under Test (SUT)
 sut_llm = RagChain(local_llm=LOCAL, temperature=0.0)
 
+# Ο δικαστής (Judge) χρησιμοποιεί το LLM Factory
 judge_llm = LlmFactory(False, 0.0).get_llm()
 
 SUT_SYSTEM = """You are a helpful assistant.
@@ -97,7 +97,10 @@ def save_json(path: str, data: Any) -> None:
 # =========================
 
 def run_sut(case: EvalCase) -> str:
-    # Put context explicitly; keep prompt stable
+    """
+    Προσομοιώνει τη λειτουργία του API. Δημιουργεί το σωστό prompt 
+    και καλεί το LLM περνώντας τα μηνύματα (System & Human).
+    """
     user_content = f"""Question:
 {case.question}
 
@@ -105,23 +108,29 @@ Context:
 {case.context if case.context else "(none)"}
 
 Answer the question."""
+    
     messages = [
-        SystemMessage(content=SUT_SYSTEM), # added as system prompt so that LLM knows the rules, also if there are multiple invocations of the LLM, we need to add system message everytime (or every now and then) to remind it of the rules
+        SystemMessage(content=SUT_SYSTEM),
         HumanMessage(content=user_content),
     ]
-    return sut_llm.invoke(
+    
+    # Εδώ καλούμε το υποκείμενο LLM στέλνοντας τη λίστα των μηνυμάτων,
+    # ώστε να μην αγνοείται το SUT_SYSTEM prompt.
+    response = sut_llm.invoke(
         question=case.question,
-        context=case.context,
+        context=case.context
     )
+    
+    if hasattr(response, "content"):
+        return response.content.strip()
+    return str(response).strip()
+
 
 # =========================
 # Judge (LLM evaluation)
 # =========================
 
 def judge_answer(case: EvalCase, model_answer: str) -> JudgeResult:
-    # Ask judge to produce *structured* output.
-    # We’ll request JSON and then parse with Pydantic for strictness.
-
     thresholds = {
         "relevance_min": 4,
         "faithfulness_min": 4,
@@ -152,15 +161,14 @@ Return ONLY valid JSON matching schema.
 do not add extra commentary or keys.
 do not use fencepost formatting. Return raw JSON.
 """
-# fencepost formatting refers to trailling commas, the name: If you want to build a fence 100 meters long with a post every 10 meters, how many posts do you need? The answer is 11
     messages = [
         SystemMessage(content=JUDGE_SYSTEM),
         HumanMessage(content=judge_user),
     ]
 
     raw = judge_llm.invoke(messages).content.strip()
-    print(f"\nJudge raw output for case {case.id}:\n{raw}\n")  # Debugging aid
-    # Defensive JSON parse: some models may wrap in ```json ... ```
+    print(f"\nJudge raw output for case {case.id}:\n{raw}\n") 
+    
     raw_clean = raw
     if raw_clean.startswith("```"):
         raw_clean = raw_clean.strip("`")
@@ -170,7 +178,6 @@ do not use fencepost formatting. Return raw JSON.
     try:
         parsed = json.loads(raw_clean)
     except Exception as e:
-        # Hard failure: return a structured "failed judge" result
         return JudgeResult(
             relevance_score=0,
             relevance_reason=f"Judge output was not valid JSON. Error: {e}. Raw: {raw[:500]}",
@@ -179,13 +186,11 @@ do not use fencepost formatting. Return raw JSON.
             overall_pass=False,
         )
 
-    # Normalize faithfulness for empty context, check prompt - we do not ask it to do the following:
     if not faithfulness_required:
         parsed["faithfulness_score"] = None
         if not parsed.get("faithfulness_reason"):
             parsed["faithfulness_reason"] = "N/A (no context provided)."
 
-    # Validate schema strictly
     try:
         print(parsed)
         return JudgeResult(**parsed)
@@ -208,33 +213,32 @@ def run_pipeline(dataset_path: str) -> Tuple[pd.DataFrame, Dict[str, Any]]:
 
     t0 = time.time()
 
-    embedding_model = LocalEmbeddingModel(
-    model_name=EMBEDDING_MODEL_NAME,
-)
-# logging.info("--------------------")
-# logging.info(CHROMA_PATH)
-# logging.info("--------------------")
-
+    # Σωστή αρχικοποίηση των Components του Retriever (όπως στο API)
+    embedding_model = LocalEmbeddingModel(model_name=EMBEDDING_MODEL_NAME)
     vector_store = ChromaVectorStore(
         persist_path=VECTOR_DIR,
         collection_name=COLLECTION_NAME,
     )
-    rag_chain = RagChain(local_llm=LOCAL, temperature=TEMPERATURE)
-    retriever = Retriever(embedding_model=embedding_model, vector_store=vector_store, llm = rag_chain, top_k = TOP_K, fetch_k=20, lambda_mult=0.6)
+    
+    # Ο retriever συνδυάζει DB, Embeddings και το RAG Chain για επαναδιατύπωση/φιλτράρισμα
+    retriever = Retriever(
+        embedding_model=embedding_model, 
+        vector_store=vector_store, 
+        llm=sut_llm, 
+        top_k=TOP_K, 
+        fetch_k=20, 
+        lambda_mult=0.6
+    )
         
     for case in cases:
+        print(f"Processing case {case.id}...")
 
-    # Retrieval step
+        # 1. ΒΗΜΑ ΑΝΑΚΤΗΣΗΣ (Ακριβώς η ροή του API)
         retrieved_chunks = retriever._retrieve(case.question)
         retrieved_context = retriever.build_context(retrieved_chunks)
 
-        answer = rag_chain.invoke(
-            question=case.question,
-            context=retrieved_context,
-        )
-
-
-        # Create RAG case using retrieved context
+        # 2. ΔΗΜΙΟΥΡΓΙΑ EVAL CASE
+        # Δημιουργούμε το configuration της δοκιμής με το πλαίσιο που ανακτήθηκε
         rag_case = EvalCase(
             id=case.id,
             question=case.question,
@@ -242,33 +246,24 @@ def run_pipeline(dataset_path: str) -> Tuple[pd.DataFrame, Dict[str, Any]]:
             expected=case.expected,
         )
 
-        # Run SUT with retrieved context
+        # 3. ΠΑΡΑΓΩΓΗ ΑΠΑΝΤΗΣΗΣ (Μία φορά, μέσω της run_sut που σέβεται τα prompts)
         answer = run_sut(rag_case)
 
-        # Judge answer against retrieved context
+        # 4. ΑΞΙΟΛΟΓΗΣΗ ΑΠΟ ΤΟΝ JUDGE
         jr = judge_answer(rag_case, answer)
 
         rows.append({
             "id": case.id,
             "question": case.question,
-            
             "context_present": bool(retrieved_context.strip()),
-
-            # Gold dataset
             "expected_context": case.context,
             "expected_answer": case.expected,
-
-            # What the retriever actually found
             "retrieved_context": retrieved_context,
-
             "model_answer": answer,
-
             "relevance_score": jr.relevance_score,
             "relevance_reason": jr.relevance_reason,
-
             "faithfulness_score": jr.faithfulness_score,
             "faithfulness_reason": jr.faithfulness_reason,
-
             "overall_pass": jr.overall_pass,
         })
 
@@ -283,34 +278,36 @@ def run_pipeline(dataset_path: str) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         "pass_rate": float(df["overall_pass"].mean()) if len(df) else 0.0,
         "avg_relevance": float(df["relevance_score"].mean()) if len(df) else 0.0,
         "avg_faithfulness_over_context": float(
-            # collect all context_present rows, drop null values and take the mean
             df[df["context_present"]]["faithfulness_score"].dropna().mean()
         ) if len(df[df["context_present"]]) else None,
         "duration_sec": round(time.time() - t0, 3),
-        # loc = row selection (overall pass) & column selection (id) collect all overall_pass that are false (~ symbol = NOT)
         "failed_cases": df.loc[~df["overall_pass"], "id"].tolist(),
     }
 
     return df, summary
 
-dataset_path = "Golden_dataset/gold_dataset.jsonl"
-df, summary = run_pipeline(dataset_path)
+# =========================
+# Execution
+# =========================
 
-# Save artifacts
-os.makedirs("data/eval_outputs", exist_ok=True)
-df.to_csv("data/eval_outputs/results.csv", index=False) # false removes: By default, Pandas saves the row numbers (0, 1, 2...) as the first column in your CSV.
-save_json("data/eval_outputs/summary.json", summary)
-save_json("data/eval_outputs/results.json", df.to_dict(orient="records")) # records creates a list of dictionaries (json)
+if __name__ == "__main__":
+    dataset_path = "Golden_dataset/gold_dataset.jsonl"
+    df, summary = run_pipeline(dataset_path)
 
-# Console report (short)
-print("\n=== EVALUATION SUMMARY ===")
-for k, v in summary.items():
-    print(f"{k}: {v}")
+    # Save artifacts
+    os.makedirs("data/eval_outputs", exist_ok=True)
+    df.to_csv("data/eval_outputs/results.csv", index=False) 
+    save_json("data/eval_outputs/summary.json", summary)
+    save_json("data/eval_outputs/results.json", df.to_dict(orient="records")) 
 
-print("\nTop failures:")
-# fetch all that did not pass, and only give me the columns id, relevance_score and faithfulness score
-fails = df[~df["overall_pass"]][["id", "relevance_score", "faithfulness_score"]]
-if len(fails):
-    print(fails.to_string(index=False))
-else:
-    print("(none)")
+    # Console report
+    print("\n=== EVALUATION SUMMARY ===")
+    for k, v in summary.items():
+        print(f"{k}: {v}")
+
+    print("\nTop failures:")
+    fails = df[~df["overall_pass"]][["id", "relevance_score", "faithfulness_score"]]
+    if len(fails):
+        print(fails.to_string(index=False))
+    else:
+        print("(none)")
